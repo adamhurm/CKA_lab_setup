@@ -1,0 +1,160 @@
+---
+- name: Set up control-plane
+  hosts: all
+  become: true
+  tasks:
+    - name: Install packages that allow apt to be used over HTTPS
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - git
+          - gnupg2
+          - lsb-release
+          - software-properties-common
+          - uidmap
+          - vim
+          - wget
+
+    - name: Add an apt signing key for Docker
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add apt repository for stable version
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install docker and its dependecies
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+      notify:
+        - Check docker status
+
+    - name: Add vagrant user to docker group
+      ansible.builtin.user:
+        name: vagrant
+        group: docker
+
+    - name: Remove swapfile from /etc/fstab
+      ansible.posix.mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      with_items:
+        - swap
+        - none
+
+    - name: Disable swap
+      ansible.builtin.command: swapoff -a
+      changed_when: ansible_swaptotal_mb == 0
+      when: ansible_swaptotal_mb > 0
+
+    - name: Create keyring directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add an apt signing key for Kubernetes
+      ansible.builtin.apt_key:
+        keyring: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Adding apt repository for Kubernetes
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+        filename: kubernetes
+
+    - name: Install Kubernetes binaries
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      vars:
+        packages:
+          - kubelet
+          - kubeadm
+          - kubectl
+
+    - name: Configure node ip # https://github.com/kubernetes/release/pull/672
+      ansible.builtin.lineinfile:
+        path: /etc/default/kubelet
+        line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+        state: present
+        create: true
+        mode: '0644'
+
+    - name: Restart kubelet
+      ansible.builtin.service:
+        name: kubelet
+        daemon_reload: true
+        state: restarted
+
+    - name: Clear containerd config # https://github.com/containerd/containerd/issues/4581
+      ansible.builtin.file:
+        path: /etc/containerd/config.toml
+        state: absent
+
+    - name: Restart containerd
+      ansible.builtin.service:
+        name: containerd
+        daemon_reload: true
+        state: restarted
+
+    - name: Initialize the Kubernetes cluster using kubeadm
+      ansible.builtin.command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10" \
+                               --node-name k8s-master --pod-network-cidr=192.168.0.0/16
+      changed_when: true # TODO: clean up
+
+    - name: Setup kubeconfig for vagrant user
+      ansible.builtin.command: "{{ item }}"
+      with_items:
+        - mkdir -p /home/vagrant/.kube
+        - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+        - chown vagrant:vagrant /home/vagrant/.kube/config
+      changed_when: true # TODO: clean up
+
+    - name: Install calico operator and CRDs
+      become: false
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+      changed_when: true # TODO: clean up
+
+    - name: Install calico pod network
+      become: false
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+      changed_when: true # TODO: clean up
+
+    - name: Generate join command
+      ansible.builtin.command: kubeadm token create --print-join-command
+      register: join_command
+      changed_when: true # TODO: clean up
+
+    - name: Copy join command to local file
+      become: false
+      ansible.builtin.copy:
+        content: "{{ join_command.stdout_lines[0] }}"
+        dest: ./join-command
+        mode: '0777'
+      delegate_to: localhost
+
+  handlers:
+    - name: Check docker status
+      ansible.builtin.service:
+        name: docker
+        state: started
