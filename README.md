@@ -28,6 +28,19 @@ v.memory = 8192
 v.cpus = 3
 ```
 
+## High Availability
+
+Introduced later in the lab. I will clean this code up soon, but for now this is the way to launch HA cluster (multiple control-planes):
+
+```
+# Vagrantfile
+...
+C = 2  # control-planes
+N = 3  # nodes
+...
+
+$ VAGRANT_VAGRANTFILE=Vagrantfile-HA vagrant up
+```
 
 ## References
 
