@@ -16,32 +16,24 @@ $ vagrant up
 
 ## Customize
 
-By default, creates one control-plane and two nodes. Allocates 3 vCPUs and 8GB to each VM.
+Launch HA cluster (multiple control-planes):
 
-To change this behavior, edit the following values in Vagrantfile:
 ```
 # Vagrantfile
 ...
-N = 2
+C = 2  # additional control-planes
+N = 3  # nodes
 ...
 v.memory = 8192
 v.cpus = 3
 ```
 
-## High Availability
+## High Availability Branch
 
-Introduced later in the lab. I will clean this code up soon, but for now this is the way to launch HA cluster (multiple control-planes):
-
-```
-# Vagrantfile
-...
-C = 2  # control-planes
-N = 3  # nodes
-...
-
-$ VAGRANT_VAGRANTFILE=Vagrantfile-HA vagrant up
-```
+Introduced later in the lab. I will clean this code up soon.
 
 ## References
 
 Vagrantfile template taken from [this Kubernetes blog post](https://kubernetes.io/blog/2019/03/15/kubernetes-setup-using-ansible-and-vagrant/). Updated for 22.04 LTS (Focal Fossa).
+
+High Availability guidance taken from these kubernetes documentation pages: [kubeadm create cluster](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/), [kubeadm high availbility](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/), [kubeadm setup ha etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/)

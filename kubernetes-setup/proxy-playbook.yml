@@ -1,0 +1,26 @@
+---
+- name: Set up node(s)
+  hosts: all
+  become: true
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      vars:
+        packages:
+          - haproxy
+          - vim
+
+    - name: Copy haproxy.cfg
+      ansible.builtin.copy:
+        src: ./config_files/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
+        mode: preserve
+
+    - name: Restart haproxy
+      ansible.builtin.service:
+        name: haproxy
+        daemon_reload: true
+        state: restarted
