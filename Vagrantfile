@@ -12,13 +12,13 @@ Vagrant.configure("2") do |config|
 
     config.vm.define "cp-lb" do |cplb|
         cplb.vm.box = IMAGE_NAME
-        cplb.vm.network "private_network", ip: "192.168.50.9"
+        cplb.vm.network "private_network", ip: "192.168.50.10"
         cplb.vm.hostname = "cp-lb"
         cplb.vm.provision "ansible" do |ansible|
             ansible.compatibility_mode = "2.0"
             ansible.playbook = "kubernetes-setup/haproxy-playbook.yml"
             ansible.extra_vars = {
-                node_ip: "192.168.50.9",
+                node_ip: "192.168.50.10",
             }
         end
     end
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
                     node_ip: "192.168.50.#{i + 10}",
                 }
             end
-            if i == 0 then
+            if i == 1 then
                 cp.vm.provision "lead-cp-setup", type:'ansible' do |ansible|
                     ansible.compatibility_mode = "2.0"
                     ansible.playbook = "kubernetes-setup/cp-lead-playbook.yml"

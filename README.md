@@ -24,17 +24,17 @@ $ sudo -e /etc/haproxy/haproxy.cfg
 ...
 backend k8sServers
    balance roundrobin
-   server cp-1  192.168.50.10:6443 check
-#   server cp-2  192.168.50.11:6443 check <--uncomment for each additional control-plane
+   server cp-1  192.168.50.11:6443 check
+#   server cp-2  192.168.50.12:6443 check <--uncomment for each additional control-plane
 #   server cp-3  192.168.50.12:6443 check <--uncomment for each additional control-plane
 ...
 ===>
 ...
 backend k8sServers
    balance roundrobin
-   server cp-1  192.168.50.10:6443 check
-   server cp-2  192.168.50.11:6443 check
-   server cp-3  192.168.50.12:6443 check
+   server cp-1  192.168.50.11:6443 check
+   server cp-2  192.168.50.12:6443 check
+   server cp-3  192.168.50.13:6443 check
 ...
 
 $ sudo systemctl restart haproxy
@@ -43,7 +43,7 @@ $ sudo systemctl restart haproxy
 
 ## Customize
 
-Launch high availability cluster. This HA cluster will use [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology). The following will create C+1 control-planes, N nodes, and 1 load balancer.
+Launch high availability cluster. This HA cluster will use [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology). So this default will create 3 control-planes, 3 nodes, and 1 load balancer which will consume 56GB RAM and   CPU cores.
 
 ℹ️ If you increase the number of control-planes, make sure to create a new line for the new control-plane(s) in haproxy.cfg
 
