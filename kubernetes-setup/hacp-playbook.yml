@@ -60,7 +60,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: true # TODO: clean up
+      changed_when: ansible_swaptotal_mb == 0
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -120,7 +120,7 @@
     - name: Copy the certificate key to server location
       become: false
       ansible.builtin.copy:
-        src: certificate
+        src: ./certificate
         dest: /tmp/certificate.txt
         mode: '0666'
 
@@ -144,8 +144,9 @@
         insertafter: EOF
 
     - name: Join the control-plane to cluster
-      ansible.builtin.script:
-        cmd: /tmp/join-command.sh
+      changed_when: true
+      ansible.builtin.command:
+        cmd: bash /tmp/join-command.sh
 
   handlers:
     - name: Check docker status

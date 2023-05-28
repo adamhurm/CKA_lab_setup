@@ -60,7 +60,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: true # TODO: clean up
+      changed_when: ansible_swaptotal_mb == 0
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -149,8 +149,10 @@
       changed_when: true # TODO: clean up
 
     - name: Set up autocomplete
-      ansible.builtin.command: echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
-      changed_when: true # TODO: clean up
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: "source <(kubectl completion bash)"
+        insertafter: EOF
 
     - name: Install calico operator and CRDs
       become: false

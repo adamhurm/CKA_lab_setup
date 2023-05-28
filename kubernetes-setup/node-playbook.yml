@@ -55,7 +55,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: true # TODO: clean up
+      changed_when: ansible_swaptotal_mb == 0 # TODO: clean up
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -83,9 +83,9 @@
         update_cache: true
       vars:
         packages:
-          - kubelet=1.18.6-00
-          - kubeadm=1.18.6-00
-          - kubectl=1.18.6-00
+          - kubelet
+          - kubeadm
+          - kubectl
 
     - name: Configure node ip # https://github.com/kubernetes/release/pull/672
       ansible.builtin.lineinfile:
@@ -135,8 +135,9 @@
         insertafter: EOF
 
     - name: Join the node to cluster
-      ansible.builtin.script:
-        cmd: /tmp/join-command.sh
+      changed_when: true
+      ansible.builtin.command:
+        cmd: bash /tmp/join-command.sh
 
   handlers:
     - name: Check docker status
