@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provider "virtualbox" do |v|
         v.memory = 8192
-        v.cpus = 3
+        v.cpus = 2
     end
 
     config.vm.define "cplb" do |cplb|
@@ -15,6 +15,7 @@ Vagrant.configure("2") do |config|
         cplb.vm.network "private_network", ip: "192.168.50.9"
         cplb.vm.hostname = "cplb"
         cplb.vm.provision "ansible" do |ansible|
+            ansible.compatibility_mode = "2.0"
             ansible.playbook = "kubernetes-setup/proxy-playbook.yml"
             ansible.extra_vars = {
                 node_ip: "192.168.50.9",

@@ -112,13 +112,20 @@
         daemon_reload: true
         state: restarted
 
-    - name: Copy the join command to server location
-      become: false
-      ansible.builtin.copy:
-        src: ./join-command
-        dest: /tmp/join-command.sh
-        mode: '0777'
-      delegate_to: localhost
+    - name: Copy join command
+      ansible.builtin.shell:
+        cmd: |
+          grep "join any number of worker nodes" /tmp/certificate.txt -A 3 | tail -2 \
+          > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
+      # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
+      tags:
+        - skip_ansible_lint
+
+    - name: Add a line to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "192.168.50.9 cplb"
+        insertafter: EOF
 
     - name: Join the node to cluster
       ansible.builtin.script:

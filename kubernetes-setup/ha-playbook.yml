@@ -117,23 +117,27 @@
         daemon_reload: true
         state: restarted
 
-    - name: Copy the join command to server location
+    - name: Copy the certificate key to server location
       become: false
       ansible.builtin.copy:
-        src: ./join-command
-        dest: /tmp/join-command.sh
-        mode: '0777'
-      delegate_to: localhost
+        src: certificate
+        dest: /tmp/certificate.txt
+        mode: '0666'
 
     - name: Add control-plane args to join command
       ansible.builtin.shell:
         cmd: |
-          echo -n "--control-plane --certificate-key \
-          $(kubeadm init phase upload-certs --upload-certs | grep -vw -e certificate -e Namespace)" \
-          >> /tmp/join-command.sh
+          grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \
+          > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
       # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
       tags:
         - skip_ansible_lint
+
+    - name: Add a line to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "192.168.50.9 cplb"
+        insertafter: EOF
 
     - name: Join the control-plane to cluster
       ansible.builtin.script:
