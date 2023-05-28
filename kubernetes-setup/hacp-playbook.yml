@@ -124,7 +124,7 @@
         dest: /tmp/certificate.txt
         mode: '0666'
 
-    - name: Copy join command and add **required** `--apiserver-advertise-address` to bind to correct IP
+    - name: Copy and modify join command
       ansible.builtin.shell:
         cmd: |
           grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \

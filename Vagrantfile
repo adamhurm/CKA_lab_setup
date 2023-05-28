@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
         cplb.vm.hostname = "cplb"
         cplb.vm.provision "ansible" do |ansible|
             ansible.compatibility_mode = "2.0"
-            ansible.playbook = "kubernetes-setup/proxy-playbook.yml"
+            ansible.playbook = "kubernetes-setup/haproxy-playbook.yml"
             ansible.extra_vars = {
                 node_ip: "192.168.50.9",
             }
@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
             cp.vm.hostname = "cp#{i}"
             cp.vm.provision "ansible" do |ansible|
                 ansible.compatibility_mode = "2.0"
-                ansible.playbook = "kubernetes-setup/ha-playbook.yml"
+                ansible.playbook = "kubernetes-setup/hacp-playbook.yml"
                 ansible.extra_vars = {
                     node_ip: "192.168.50.#{i + 10}",
                 }
