@@ -128,7 +128,7 @@
       ansible.builtin.shell:
         cmd: |
           grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \
-          | echo -e "$(cat -) --apiserver-advertise-address=\"{{ node_ip }}\"" \
+          | echo "$(cat -) --apiserver-advertise-address=\"{{ node_ip }}\"" \
           > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
       # `--apiserver-advertise-address` is **required** to bind to correct IP.
       # otherwise host-only interface is selected for etcd (10.0.2.15)
