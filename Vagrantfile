@@ -1,5 +1,5 @@
 IMAGE_NAME = "ubuntu/focal64"
-C = 3
+C = 1
 N = 3
 
 Vagrant.configure("2") do |config|
@@ -10,16 +10,18 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
     end
 
-    config.vm.define "cp-lb" do |cplb|
-        cplb.vm.box = IMAGE_NAME
-        cplb.vm.network "private_network", ip: "192.168.50.10"
-        cplb.vm.hostname = "cp-lb"
-        cplb.vm.provision "ansible" do |ansible|
-            ansible.compatibility_mode = "2.0"
-            ansible.playbook = "kubernetes-setup/haproxy-playbook.yml"
-            ansible.extra_vars = {
-                node_ip: "192.168.50.10",
-            }
+    if C > 1 then
+        config.vm.define "cp-lb" do |cplb|
+            cplb.vm.box = IMAGE_NAME
+            cplb.vm.network "private_network", ip: "192.168.50.10"
+            cplb.vm.hostname = "cp-lb"
+            cplb.vm.provision "ansible" do |ansible|
+                ansible.compatibility_mode = "2.0"
+                ansible.playbook = "kubernetes-setup/haproxy-playbook.yml"
+                ansible.extra_vars = {
+                    node_ip: "192.168.50.10",
+                }
+            end
         end
     end
 
@@ -35,21 +37,31 @@ Vagrant.configure("2") do |config|
                     node_ip: "192.168.50.#{i + 10}",
                 }
             end
-            if i == 1 then
-                cp.vm.provision "lead-cp-setup", type:'ansible' do |ansible|
+            if C == 1 then
+                cp.vm.provision "only-cp", type:'ansible' do |ansible|
                     ansible.compatibility_mode = "2.0"
-                    ansible.playbook = "kubernetes-setup/cp-lead-playbook.yml"
+                    ansible.playbook = "kubernetes-setup/cp-only-playbook.yml"
                     ansible.extra_vars = {
-                        node_ip: "192.168.50.#{i + 10}",
+                        node_ip: "192.168.50.10",
                     }
                 end
-            else
-                cp.vm.provision "ha-cp-setup", type:'ansible' do |ansible|
-                    ansible.compatibility_mode = "2.0"
-                    ansible.playbook = "kubernetes-setup/cp-ha-playbook.yml"
-                    ansible.extra_vars = {
-                        node_ip: "192.168.50.#{i + 10}",
-                    }
+            else 
+                if i == 1 then
+                    cp.vm.provision "lead-cp-setup", type:'ansible' do |ansible|
+                        ansible.compatibility_mode = "2.0"
+                        ansible.playbook = "kubernetes-setup/cp-lead-playbook.yml"
+                        ansible.extra_vars = {
+                            node_ip: "192.168.50.#{i + 10}",
+                        }
+                    end
+                else
+                    cp.vm.provision "ha-cp-setup", type:'ansible' do |ansible|
+                        ansible.compatibility_mode = "2.0"
+                        ansible.playbook = "kubernetes-setup/cp-ha-playbook.yml"
+                        ansible.extra_vars = {
+                            node_ip: "192.168.50.#{i + 10}",
+                        }
+                    end
                 end
             end
         end
