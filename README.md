@@ -16,7 +16,7 @@ $ vagrant up
 
 ## Customize
 
-Launch HA cluster (multiple control-planes):
+Launch high availability cluster. This HA cluster will use [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology).
 
 ```
 # Vagrantfile
@@ -28,9 +28,6 @@ v.memory = 8192
 v.cpus = 3
 ```
 
-## High Availability Branch
-
-Introduced later in the lab. I will clean this code up soon.
 
 ## References
 
