@@ -35,16 +35,16 @@ etcd:
         peerCertSANs:
         - "${HOST}"
         extraArgs:
-            apiserver-advertise-address: 192.168.50.9
+            apiserver-advertise-address: ${HOST}
             initial-cluster: ${NAMES[0]}=https://${HOSTS[0]}:2380,${NAMES[1]}=https://${HOSTS[1]}:2380,${NAMES[2]}=https://${HOSTS[2]}:2380
             initial-cluster-state: new
             name: ${NAME}
             listen-peer-urls: https://${HOST}:2380
-            listen-client-urls: https://${HOST}:2379
+            listen-client-urls: https://${HOST}:2379,http://127.0.0.1:2379
             advertise-client-urls: https://${HOST}:2379
             initial-advertise-peer-urls: https://${HOST}:2380
 networking:
-    podSubnet: "192.168.0.0/16"
+    podSubnet: "10.244.0.0/16"
 controlPlaneEndpoint: "cplb:6443"
 EOF
 done

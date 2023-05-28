@@ -55,7 +55,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: ansible_swaptotal_mb == 0
+      changed_when: true # TODO: clean up
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -83,9 +83,9 @@
         update_cache: true
       vars:
         packages:
-          - kubelet
-          - kubeadm
-          - kubectl
+          - kubelet=1.18.6-00
+          - kubeadm=1.18.6-00
+          - kubectl=1.18.6-00
 
     - name: Configure node ip # https://github.com/kubernetes/release/pull/672
       ansible.builtin.lineinfile:
@@ -111,6 +111,13 @@
         name: containerd
         daemon_reload: true
         state: restarted
+
+    - name: Copy the certificate key to server location
+      become: false
+      ansible.builtin.copy:
+        src: certificate
+        dest: /tmp/certificate.txt
+        mode: '0666'
 
     - name: Copy join command
       ansible.builtin.shell:

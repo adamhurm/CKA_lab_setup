@@ -60,7 +60,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: ansible_swaptotal_mb == 0
+      changed_when: true # TODO: clean up
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -124,16 +124,20 @@
         dest: /tmp/certificate.txt
         mode: '0666'
 
-    - name: Add control-plane args to join command
+    - name: Copy join command and add **required** `--apiserver-advertise-address` to bind to correct IP
       ansible.builtin.shell:
         cmd: |
           grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \
+          | echo -e "$(cat -) --apiserver-advertise-address=\"{{ node_ip }}\"" \
           > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
-      # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
+      # `--apiserver-advertise-address` is **required** to bind to correct IP.
+      # otherwise host-only interface is selected for etcd (10.0.2.15)
+      # https://github.com/kubernetes/kubeadm/issues/1359#issuecomment-619564221
       tags:
         - skip_ansible_lint
+      # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
 
-    - name: Add a line to /etc/hosts
+    - name: Add HAProxy VM to /etc/hosts
       ansible.builtin.lineinfile:
         path: /etc/hosts
         line: "192.168.50.9 cplb"

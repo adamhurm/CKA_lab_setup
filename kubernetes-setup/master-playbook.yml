@@ -60,7 +60,7 @@
 
     - name: Disable swap
       ansible.builtin.command: swapoff -a
-      changed_when: ansible_swaptotal_mb == 0
+      changed_when: true # TODO: clean up
       when: ansible_swaptotal_mb > 0
 
     - name: Create keyring directory
@@ -123,17 +123,14 @@
         line: "192.168.50.9 cplb"
         insertafter: EOF
 
-
-    # - name: Initialize the Kubernetes cluster using kubeadm
-    #   ansible.builtin.command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10" \
-    #                            --node-name cp0 --pod-network-cidr=10.244.0.0/16 --upload-certs
-    #   register: certificate_key
-    #   changed_when: true # TODO: clean up
-
     - name: Save certificate key for other control planes
-      ansible.builtin.command: kubeadm init --control-plane-endpoint "cplb:6443" --pod-network-cidr=192.168.0.0/16 --upload-certs
+      ansible.builtin.command: kubeadm init --control-plane-endpoint "cplb:6443" --upload-certs \
+                               --apiserver-advertise-address="{{ node_ip }}" --pod-network-cidr=192.168.0.0/16
       register: certificate_key
       changed_when: true # TODO: clean up
+      # `--apiserver-advertise-address` is **required** to bind to correct IP.
+      # otherwise host-only interface is selected for etcd (10.0.2.15)
+      # https://github.com/kubernetes/kubeadm/issues/1359#issuecomment-619564221
 
     - name: Copy certificate key command to local file
       become: false
@@ -154,11 +151,6 @@
     - name: Set up autocomplete
       ansible.builtin.command: echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
       changed_when: true # TODO: clean up
-
-    # - name: Install flannel
-    #   become: false
-    #   ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-    #   changed_when: true # TODO: clean up
 
     - name: Install calico operator and CRDs
       become: false
