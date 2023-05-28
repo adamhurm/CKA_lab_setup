@@ -1,0 +1,45 @@
+---
+- name: Set up lead control-plane
+  hosts: all
+  become: true
+  tasks:
+    - name: Save certificate key for other control planes
+      ansible.builtin.command: kubeadm init --control-plane-endpoint "cplb:6443" --upload-certs \
+                               --apiserver-advertise-address="{{ node_ip }}" --pod-network-cidr=192.168.0.0/16
+      register: certificate_key
+      changed_when: true # TODO: clean up
+      # `--apiserver-advertise-address` is **required** to bind to correct IP.
+      # otherwise host-only interface is selected for etcd (10.0.2.15)
+      # https://github.com/kubernetes/kubeadm/issues/1359#issuecomment-619564221
+
+    - name: Copy certificate key command to local file
+      become: false
+      ansible.builtin.copy:
+        content: "{{ certificate_key.stdout }}"
+        dest: ./certificate
+        mode: '0666'
+      delegate_to: localhost
+
+    - name: Setup kubeconfig for vagrant user
+      ansible.builtin.command: "{{ item }}"
+      with_items:
+        - mkdir -p /home/vagrant/.kube
+        - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+        - chown vagrant:vagrant /home/vagrant/.kube/config
+      changed_when: true # TODO: clean up
+
+    - name: Set up autocomplete
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: "source <(kubectl completion bash)"
+        insertafter: EOF
+
+    - name: Install calico operator and CRDs
+      become: false
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+      changed_when: true # TODO: clean up
+
+    - name: Install calico pod network
+      become: false
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+      changed_when: true # TODO: clean up

@@ -1,5 +1,5 @@
 ---
-- name: Set up control-plane
+- name: Set up k8s
   hosts: all
   become: true
   tasks:
@@ -13,13 +13,9 @@
           - apt-transport-https
           - ca-certificates
           - curl
-          - git
           - gnupg2
-          - lsb-release
           - software-properties-common
-          - uidmap
           - vim
-          - wget
 
     - name: Add an apt signing key for Docker
       ansible.builtin.apt_key:
@@ -116,37 +112,6 @@
         name: containerd
         daemon_reload: true
         state: restarted
-
-    - name: Copy the certificate key to server location
-      become: false
-      ansible.builtin.copy:
-        src: ./certificate
-        dest: /tmp/certificate.txt
-        mode: '0666'
-
-    - name: Copy and modify join command
-      ansible.builtin.shell:
-        cmd: |
-          grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \
-          | echo "$(cat -) --apiserver-advertise-address=\"{{ node_ip }}\"" \
-          > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
-      # `--apiserver-advertise-address` is **required** to bind to correct IP.
-      # otherwise host-only interface is selected for etcd (10.0.2.15)
-      # https://github.com/kubernetes/kubeadm/issues/1359#issuecomment-619564221
-      tags:
-        - skip_ansible_lint
-      # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
-
-    - name: Add HAProxy VM to /etc/hosts
-      ansible.builtin.lineinfile:
-        path: /etc/hosts
-        line: "192.168.50.9 cplb"
-        insertafter: EOF
-
-    - name: Join the control-plane to cluster
-      changed_when: true
-      ansible.builtin.command:
-        cmd: bash /tmp/join-command.sh
 
   handlers:
     - name: Check docker status

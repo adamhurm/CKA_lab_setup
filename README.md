@@ -17,24 +17,24 @@ $ vagrant up
 Now log into the HAProxy VM and uncomment the lines to start load balancing:
 
 ```shell
-$ vagrant ssh cplb
+$ vagrant ssh cp-lb
 $ sudo -e /etc/haproxy/haproxy.cfg
 
 ### /etc/haproxy/haproxy.cfg
 ...
 backend k8sServers
    balance roundrobin
-   server cp0  192.168.50.10:6443 check
-#   server cp1  192.168.50.11:6443 check <--uncomment for each additional control-plane
-#   server cp2  192.168.50.12:6443 check <--uncomment for each additional control-plane
+   server cp-1  192.168.50.10:6443 check
+#   server cp-2  192.168.50.11:6443 check <--uncomment for each additional control-plane
+#   server cp-3  192.168.50.12:6443 check <--uncomment for each additional control-plane
 ...
 ===>
 ...
 backend k8sServers
    balance roundrobin
-   server cp0  192.168.50.10:6443 check
-   server cp1  192.168.50.11:6443 check
-   server cp2  192.168.50.12:6443 check
+   server cp-1  192.168.50.10:6443 check
+   server cp-2  192.168.50.11:6443 check
+   server cp-3  192.168.50.12:6443 check
 ...
 
 $ sudo systemctl restart haproxy
@@ -50,7 +50,7 @@ Launch high availability cluster. This HA cluster will use [stacked etcd](https:
 ```Vagrantfile
 ### Vagrantfile
 ...
-C = 2  # additional control-planes
+C = 3  # control-planes
 N = 3  # nodes
 ...
 v.memory = 8192
