@@ -21,7 +21,7 @@ By default, creates one control-plane and two nodes. Allocates 3 vCPUs and 8GB t
 
 To change this behavior, edit the following values in Vagrantfile:
 ```Vagrantfile
-# Vagrantfile
+### Vagrantfile
 ...
 C = 1 # control-plane
 N = 2 # nodes
@@ -79,7 +79,10 @@ backend k8sServers
 $ sudo systemctl restart haproxy
 ```
 
-TODO: Planning to automate the /etc/haproxy/haproxy.cfg file modification.
+## To-do
+
+ - Automate the /etc/haproxy/haproxy.cfg file modification.
+ - Automate certificate deletion. (token expires after 2 hours but this isn't ideal to leave on disk)
 
 
 ## References
