@@ -4,7 +4,7 @@
   become: true
   tasks:
     - name: Save certificate key for other control planes
-      ansible.builtin.command: kubeadm init --control-plane-endpoint "cplb:6443" --upload-certs \
+      ansible.builtin.command: kubeadm init --control-plane-endpoint "cp-lb:6443" --upload-certs \
                                --apiserver-advertise-address="{{ node_ip }}" --pod-network-cidr=192.168.0.0/16
       register: certificate_key
       changed_when: true # TODO: clean up

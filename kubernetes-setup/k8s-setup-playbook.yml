@@ -116,7 +116,7 @@
     - name: Add a line to /etc/hosts
       ansible.builtin.lineinfile:
         path: /etc/hosts
-        line: "192.168.50.10 cplb"
+        line: "192.168.50.10 cp-lb"
         insertafter: EOF
 
   handlers:
