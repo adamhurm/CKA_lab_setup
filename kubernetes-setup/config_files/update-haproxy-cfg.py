@@ -31,13 +31,20 @@ backend k8sServers
         for node_pair in args.nodes:
             name, ip = node_pair.split('=')
             backend_cfg = add_node(backend_cfg, name, ip)
-        print(cfg + frontend_cfg + backend_cfg + listen_cfg)
+        if args.u:
+            read_frontend_cfg = re.search(r'backend k8sServers(\n(\t|\ )+.*)+', cfg).group(0)
+            cfg.replace(read_backend_cfg, add_node(backend_cfg))
+            print(cfg)
+        else:
+            print(cfg + frontend_cfg + backend_cfg + listen_cfg)
 
 def main():
     parser = argparse.ArgumentParser(prog='UpdateHaproxyCfg',
                                     description='Update haproxy.cfg for HA k8s cluster')
     parser.add_argument('nodes', nargs='+', help='provide list: node1=ip1 name2=ip2 ...',
                         metavar="KEY=VALUE")
+    parser.add_argument('-u', help='update existing values instead of starting from scratch',
+                         action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
     build_config(args)
 
