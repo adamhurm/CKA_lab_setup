@@ -22,18 +22,22 @@ backend k8sServers
 
     with open('haproxy.cfg') as f:
         cfg = f.read()
+
         read_defaults_cfg = re.search(r'defaults(\n(\t|\ )+.*)+\n', cfg).group(0)
         defaults_cfg = re.sub(r'mode\shttp', 'mode\ttcp', read_defaults_cfg)
         defaults_cfg = re.sub(r'option\shttplog', 'option\ttcplog', defaults_cfg)
         cfg.replace(read_defaults_cfg, defaults_cfg)
 
+        read_backend_cfg = re.search(r'backend k8sServers(\n(\t|\ )+.*)+', cfg).group(0)
+        if read_backend_cfg:
+            backend_cfg = read_backend_cfg
+
         add_node = lambda c, n, i: c+f'    server {n}  {i}:6443 check\n'
         for node_pair in args.nodes:
             name, ip = node_pair.split('=')
             backend_cfg = add_node(backend_cfg, name, ip)
+
         if args.u:
-            read_backend_cfg = re.search(r'backend k8sServers(\n(\t|\ )+.*)+', cfg).group(0)
-            cfg.replace(read_backend_cfg, backend_cfg)
             print(cfg)
         else:
             print(cfg + frontend_cfg + backend_cfg + listen_cfg)
