@@ -33,7 +33,7 @@ backend k8sServers
             backend_cfg = add_node(backend_cfg, name, ip)
         if args.u:
             read_backend_cfg = re.search(r'backend k8sServers(\n(\t|\ )+.*)+', cfg).group(0)
-            cfg.replace(read_backend_cfg, add_node(backend_cfg))
+            cfg.replace(read_backend_cfg, backend_cfg)
             print(cfg)
         else:
             print(cfg + frontend_cfg + backend_cfg + listen_cfg)
