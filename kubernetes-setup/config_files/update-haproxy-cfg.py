@@ -53,7 +53,7 @@ listen stats
             backend_cfg = add_node(backend_cfg, name, ip)
 
         f.seek(0)
-        f.write(global_cfg+'\n'+defaults_cfg+'\n'+frontend_cfg+'\n'+backend_cfg+'\n'+listen_cfg+'\n')
+        f.write(global_cfg+defaults_cfg+'\n'+frontend_cfg+'\n'+backend_cfg+'\n'+listen_cfg+'\n')
         f.truncate()
 
 def main():
