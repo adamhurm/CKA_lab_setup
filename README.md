@@ -1,5 +1,11 @@
 # CKA Lab Setup
 
+Create a high availability cluster with [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology).
+- 3 control-planes
+- 3 nodes
+- 1 load balancer
+- Total: 14 vCPUs, 56GB RAM
+
 ## Quickstart
 
 Install the following:
@@ -28,32 +34,23 @@ Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status 
 
 [This script](ansible/scripts/ping-and-update.sh) will run on **cp-lb** to watch control-planes and [add them](ansible/scripts/update-haproxy-cfg.py) to HAProxy config as they come online.
 
-<br>
 
 ## Customize
 
 ### High Availability
-
-By default, creates high availability cluster with [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology). 
-
-The following suggested config will use:
-- 3 control-planes
-- 3 nodes
-- 1 load balancer (always)
-- Total: 14 vCPUs, 56GB RAM
+The following suggested config will use 3 control-planes, 3 nodes, 1 load balancer (always). Total: 14 vCPUs, 56GB RAM
 
 To change this behavior, edit the following values in Vagrantfile:
 ```Vagrantfile
 ### Vagrantfile
 ...
-C = 3  # control-planes
+C = 3  # control-planes | if C > 1, creates a load balancer (cp-lb)
 N = 3  # nodes
 ...
 v.memory = 8192
 v.cpus = 2
 ```
 
-<br>
 
 ### Single Control-Plane
 You can also create clusters with only one control-plane.
