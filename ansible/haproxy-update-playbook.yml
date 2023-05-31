@@ -17,7 +17,7 @@
     - name: Copy ping_and_update.sh
       become: false
       ansible.builtin.copy:
-        src: ./config_files/ping_and_update.sh
+        src: ./scripts/ping_and_update.sh
         dest: /home/vagrant/ping_and_update.sh
         mode: '0777'
 

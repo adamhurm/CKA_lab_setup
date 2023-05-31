@@ -15,6 +15,6 @@
 
     - name: Copy haproxy.cfg
       ansible.builtin.copy:
-        src: ./config_files/update-haproxy-cfg.py
+        src: ./scripts/update-haproxy-cfg.py
         dest: /home/vagrant/update-haproxy-cfg.py
         mode: '0777'
