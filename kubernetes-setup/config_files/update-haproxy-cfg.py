@@ -6,6 +6,7 @@ frontend proxynode
     bind *:80
     bind *:6443
     stats uri /proxystats
+    default_backend k8sServers
 """
     default_backend_cfg = """
 backend k8sServers
@@ -19,11 +20,10 @@ listen stats
     stats hide-version
     stats uri /stats
 """
-
-    with open('haproxy.cfg', 'r+') as f:
+    with open('/etc/haproxy/haproxy.cfg', 'r+') as f:
         cfg = f.read()
 
-        global_cfg = re.search(r'global(\n(\t|\ )+.*)+\n', cfg).group(0)
+        global_cfg = re.search(r'global(\n(\t|\ )+.*\n*)+\n', cfg).group(0)
 
         defaults_cfg = re.search(r'defaults(\n(\t|\ )+.*)+\n', cfg).group(0)
         defaults_cfg = re.sub(r'mode\shttp', 'mode\ttcp', defaults_cfg)
@@ -52,7 +52,9 @@ listen stats
             name, ip = node_pair.split('=')
             backend_cfg = add_node(backend_cfg, name, ip)
 
+        f.seek(0)
         f.write(global_cfg+'\n'+defaults_cfg+'\n'+frontend_cfg+'\n'+backend_cfg+'\n'+listen_cfg+'\n')
+        f.truncate()
 
 def main():
     parser = argparse.ArgumentParser(prog='UpdateHaproxyCfg',

@@ -3,20 +3,20 @@
   hosts: all
   become: true
   tasks:
-    - name: Save certificate key for other control planes
+    - name: Init cluster as only control plane
       ansible.builtin.command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10" \
                                --node-name k8s-master --pod-network-cidr=192.168.0.0/16
-      register: certificate_key
+      register: init_output
       changed_when: true # TODO: clean up
       # `--apiserver-advertise-address` is **required** to bind to correct IP.
       # otherwise host-only interface is selected for etcd (10.0.2.15)
       # https://github.com/kubernetes/kubeadm/issues/1359#issuecomment-619564221
 
-    - name: Copy certificate key command to local file
+    - name: Copy init command output to local file
       become: false
       ansible.builtin.copy:
-        content: "{{ certificate_key.stdout }}"
-        dest: ./certificate
+        content: "{{ init_output.stdout }}"
+        dest: ./init-output
         mode: '0666'
       delegate_to: localhost
 

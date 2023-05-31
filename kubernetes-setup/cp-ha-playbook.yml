@@ -3,17 +3,17 @@
   hosts: all
   become: true
   tasks:
-    - name: Copy the certificate key to server location
+    - name: Copy the init output to server location
       become: false
       ansible.builtin.copy:
-        src: ./certificate
-        dest: /tmp/certificate.txt
+        src: ./init-output
+        dest: /tmp/init-output
         mode: '0666'
 
     - name: Copy and modify join command
       ansible.builtin.shell:
         cmd: |
-          grep "join any number of the control-plane node" /tmp/certificate.txt -A 4 | tail -3 \
+          grep "join any number of the control-plane node" /tmp/init-output -A 4 | tail -3 \
           | echo "$(cat -) --apiserver-advertise-address=\"{{ node_ip }}\"" \
           > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
       # `--apiserver-advertise-address` is **required** to bind to correct IP.
