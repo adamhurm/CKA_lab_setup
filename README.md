@@ -12,31 +12,37 @@ $ git clone git@github.com:adamhurm/CKA_lab_setup.git
 $ cd CKA_lab_setup
 $ vagrant up
 ```
+Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status page here: http://192.168.50.10:9999/stats/
 
+[This script](ansible/scripts/ping-and-update.sh) will run on **cp-lb** to watch control-planes and [add them](ansible/scripts/update-haproxy-cfg.py) to HAProxy config as they come online.
+
+```bash
+$ vagrant ssh cp-1
+vagrant@cp-1:~$ kubectl get node
+NAME     STATUS   ROLES           AGE   VERSION
+cp-1     Ready    control-plane   86m   v1.27.2
+cp-2     Ready    control-plane   84m   v1.27.2
+cp-3     Ready    control-plane   81m   v1.27.2
+node-1   Ready    <none>          79m   v1.27.2
+node-2   Ready    <none>          77m   v1.27.2
+node-3   Ready    <none>          75m   v1.27.2
+```
+
+<br>
 
 ## Customize
 
-### Single Control Plane
-By default, creates one control-plane and two nodes. Allocates 3 vCPUs and 8GB to each VM.
-
-To change this behavior, edit the following values in Vagrantfile:
-```Vagrantfile
-### Vagrantfile
-...
-C = 1 # control-plane
-N = 2 # nodes
-...
-v.memory = 8192
-v.cpus = 3
-```
-
-
 ### High Availability
 
-Launch high availability cluster. This HA cluster will use [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology). So this default will create 3 control-planes, 3 nodes, and 1 load balancer which will consume 56GB RAM and 21 CPU cores.
+By default, creates high availability cluster with [stacked etcd](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology). 
 
-ℹ️ If you increase the number of control-planes, make sure to create a new line for the new control-plane(s) in haproxy.cfg
+The following suggested config will use:
+- 3 control-planes
+- 3 nodes
+- 1 load balancer (always)
+- Total: 14 vCPUs, 56GB RAM
 
+To change this behavior, edit the following values in Vagrantfile:
 ```Vagrantfile
 ### Vagrantfile
 ...
@@ -44,16 +50,27 @@ C = 3  # control-planes
 N = 3  # nodes
 ...
 v.memory = 8192
-v.cpus = 3
+v.cpus = 2
 ```
 
-```shell
-$ git clone git@github.com:adamhurm/CKA_lab_setup.git
-$ cd CKA_lab_setup
-$ vagrant up
+<br>
+
+### Single Control-Plane
+You can also create clusters with only one control-plane.
+
+Edit the following values in Vagrantfile to create 1 control-plane and 2 nodes:
+```Vagrantfile
+### Vagrantfile
+...
+C = 1 # control-plane
+N = 2 # nodes
+...
+# allocate 2 vCPUs and 8GB RAM to each VM
+v.memory = 8192
+v.cpus = 2
 ```
 
-You can now view load balancer status here: http://192.168.50.10:9999/stats/
+<br>
 
 
 ## To-do
