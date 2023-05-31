@@ -12,11 +12,8 @@ $ git clone git@github.com:adamhurm/CKA_lab_setup.git
 $ cd CKA_lab_setup
 $ vagrant up
 ```
-Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status page here: http://192.168.50.10:9999/stats/
 
-[This script](ansible/scripts/ping-and-update.sh) will run on **cp-lb** to watch control-planes and [add them](ansible/scripts/update-haproxy-cfg.py) to HAProxy config as they come online.
-
-```bash
+```shell
 $ vagrant ssh cp-1
 vagrant@cp-1:~$ kubectl get node
 NAME     STATUS   ROLES           AGE   VERSION
@@ -27,6 +24,9 @@ node-1   Ready    <none>          79m   v1.27.2
 node-2   Ready    <none>          77m   v1.27.2
 node-3   Ready    <none>          75m   v1.27.2
 ```
+Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status page: http://192.168.50.10:9999/stats/
+
+[This script](ansible/scripts/ping-and-update.sh) will run on **cp-lb** to watch control-planes and [add them](ansible/scripts/update-haproxy-cfg.py) to HAProxy config as they come online.
 
 <br>
 
