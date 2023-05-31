@@ -3,17 +3,17 @@
   hosts: all
   become: true
   tasks:
-    - name: Copy the certificate key to server location
+    - name: Copy the init output to server location
       become: false
       ansible.builtin.copy:
-        src: certificate
-        dest: /tmp/certificate.txt
+        src: ./init-output
+        dest: /tmp/init-output
         mode: '0666'
 
     - name: Copy join command
       ansible.builtin.shell:
         cmd: |
-          grep "join any number of worker nodes" /tmp/certificate.txt -A 3 | tail -2 \
+          grep "join any number of worker nodes" /tmp/init-output -A 3 | tail -2 \
           > /tmp/join-command.sh && chmod 777 /tmp/join-command.sh
       # TODO: figure out pipefail linter msg because `set -o pipefail` causes command to fail
       tags:

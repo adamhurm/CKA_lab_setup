@@ -1,5 +1,5 @@
 ---
-- name: Set up node(s)
+- name: Set up HAProxy
   hosts: all
   become: true
   tasks:
@@ -11,16 +11,10 @@
       vars:
         packages:
           - haproxy
-          - vim
+          - netcat
 
     - name: Copy haproxy.cfg
       ansible.builtin.copy:
-        src: ./config_files/haproxy.cfg
-        dest: /etc/haproxy/haproxy.cfg
-        mode: preserve
-
-    - name: Restart haproxy
-      ansible.builtin.service:
-        name: haproxy
-        daemon_reload: true
-        state: restarted
+        src: ./scripts/update-haproxy-cfg.py
+        dest: /home/vagrant/update-haproxy-cfg.py
+        mode: '0777'

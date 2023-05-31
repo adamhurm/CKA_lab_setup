@@ -1,0 +1,30 @@
+---
+- name: Update HAProxy config
+  hosts: cp-lb
+  become: true
+  tasks:
+    - name: Modify haproxy.cfg
+      changed_when: true
+      ansible.builtin.command:
+        cmd: python3 /home/vagrant/update-haproxy-cfg.py cp-1=192.168.50.11
+
+    - name: Restart haproxy
+      ansible.builtin.service:
+        name: haproxy
+        daemon_reload: true
+        state: restarted
+
+    - name: Copy ping-and-update.sh
+      become: false
+      ansible.builtin.copy:
+        src: ./scripts/ping-and-update.sh
+        dest: /home/vagrant/ping-and-update.sh
+        mode: '0777'
+
+    - name: Update haproxy.cfg once other nodes are up (async)
+      async: 1800 # assuming 30min max for setup
+      poll: 0 # background task
+      register: haproxycfg_sleeper
+      changed_when: true
+      ansible.builtin.command:
+        cmd: "/home/vagrant/ping-and-update.sh {{ cp_count }}"

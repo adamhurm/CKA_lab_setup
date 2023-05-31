@@ -1,2 +1,2 @@
 .vagrant
-kubernetes-setup/certificate
+ansible/init-output

@@ -53,35 +53,11 @@ $ cd CKA_lab_setup
 $ vagrant up
 ```
 
-Now log into the HAProxy VM and uncomment the lines to start load balancing:
+You can now view load balancer status here: http://192.168.50.10:9999/stats/
 
-```shell
-$ vagrant ssh cp-lb
-$ sudo -e /etc/haproxy/haproxy.cfg
-
-### /etc/haproxy/haproxy.cfg
-...
-backend k8sServers
-   balance roundrobin
-   server cp-1  192.168.50.11:6443 check
-#   server cp-2  192.168.50.12:6443 check <--uncomment for each additional control-plane
-#   server cp-3  192.168.50.12:6443 check <--uncomment for each additional control-plane
-...
-===>
-...
-backend k8sServers
-   balance roundrobin
-   server cp-1  192.168.50.11:6443 check
-   server cp-2  192.168.50.12:6443 check
-   server cp-3  192.168.50.13:6443 check
-...
-
-$ sudo systemctl restart haproxy
-```
 
 ## To-do
 
- - Automate the /etc/haproxy/haproxy.cfg file modification.
  - Automate certificate deletion. (token expires after 2 hours but this isn't ideal to leave on disk)
 
 
