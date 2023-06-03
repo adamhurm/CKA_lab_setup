@@ -21,14 +21,14 @@ $ vagrant up
 
 ```shell
 $ vagrant ssh cp-1
-vagrant@cp-1:~$ kubectl get node
-NAME     STATUS   ROLES           AGE   VERSION
-cp-1     Ready    control-plane   86m   v1.27.2
-cp-2     Ready    control-plane   84m   v1.27.2
-cp-3     Ready    control-plane   81m   v1.27.2
-node-1   Ready    <none>          79m   v1.27.2
-node-2   Ready    <none>          77m   v1.27.2
-node-3   Ready    <none>          75m   v1.27.2
+vagrant@cp-1:~$ kubectl get node -o wide
+NAME     STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+cp-1     Ready    control-plane   23h   v1.27.2   192.168.50.11   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+cp-2     Ready    control-plane   23h   v1.27.2   192.168.50.12   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+cp-3     Ready    control-plane   23h   v1.27.2   192.168.50.13   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+node-1   Ready    <none>          23h   v1.27.2   192.168.50.14   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+node-2   Ready    <none>          23h   v1.27.2   192.168.50.15   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+node-3   Ready    <none>          23h   v1.27.2   192.168.50.16   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
 ```
 Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status page: http://192.168.50.10:9999/stats/
 
