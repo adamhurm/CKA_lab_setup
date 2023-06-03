@@ -49,7 +49,8 @@ Vagrant.configure("2") do |config|
                     ansible.compatibility_mode = "2.0"
                     ansible.playbook = "ansible/cp-only-playbook.yml"
                     ansible.extra_vars = {
-                        node_ip: "192.168.50.10",
+                        node_ip: "192.168.50.11",
+                        node_name: "cp-1"
                     }
                 end
             else # Multiple control planes
