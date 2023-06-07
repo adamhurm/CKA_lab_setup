@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/haproxy-update-playbook.yml"
                 ansible.extra_vars = {
-                    cp_count: C,
+                    cp_count: "#{C}",
                 }
             end
         end

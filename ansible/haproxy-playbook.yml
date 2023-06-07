@@ -13,6 +13,13 @@
           - haproxy
           - netcat
 
+    - name: Copy update-haproxy-cfg.py
+      become: false
+      ansible.builtin.copy:
+        src: ./scripts/update-haproxy-cfg.py
+        dest: /home/vagrant/update-haproxy-cfg.py
+        mode: '0777'
+
     - name: Modify haproxy.cfg
       changed_when: true
       ansible.builtin.command:
