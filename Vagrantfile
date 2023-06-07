@@ -20,13 +20,7 @@ Vagrant.configure("2") do |config|
                 ansible.playbook = "ansible/haproxy-playbook.yml"
                 ansible.extra_vars = {
                     node_ip: "192.168.50.10",
-                }
-            end
-            cplb.vm.provision "ha-update", type:'ansible' do |ansible| # Add first control plane
-                ansible.compatibility_mode = "2.0"
-                ansible.playbook = "ansible/haproxy-update-playbook.yml"
-                ansible.extra_vars = {
-                    cp_count: "#{C}",
+                    cp_count: C
                 }
             end
         end
@@ -41,7 +35,7 @@ Vagrant.configure("2") do |config|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10}",
+                    node_ip: "192.168.50.#{i + 10}"
                 }
             end
             if C == 1 then # Only one control plane
@@ -59,7 +53,7 @@ Vagrant.configure("2") do |config|
                         ansible.compatibility_mode = "2.0"
                         ansible.playbook = "ansible/cp-lead-playbook.yml"
                         ansible.extra_vars = {
-                            node_ip: "192.168.50.11",
+                            node_ip: "192.168.50.11"
                         }
                     end
                 else # Additional control planes
@@ -67,7 +61,7 @@ Vagrant.configure("2") do |config|
                         ansible.compatibility_mode = "2.0"
                         ansible.playbook = "ansible/cp-ha-playbook.yml"
                         ansible.extra_vars = {
-                            node_ip: "192.168.50.#{i + 10}",
+                            node_ip: "192.168.50.#{i + 10}"
                         }
                     end
                 end
@@ -84,14 +78,14 @@ Vagrant.configure("2") do |config|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10 + C}",
+                    node_ip: "192.168.50.#{i + 10 + C}"
                 }
             end
             node.vm.provision "ansible" do |ansible| # Add node to cluster
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/node-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10 + C}",
+                    node_ip: "192.168.50.#{i + 10 + C}"
                 }
             end
         end

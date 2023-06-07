@@ -47,7 +47,9 @@ listen stats
         else:
             listen_cfg = default_listen_cfg
 
-        add_node = lambda c, n, i: c+f'    server {n}  {i}:6443 check\n'
+        def add_node(cfg, node, ip):
+            node_str = f'    server {node}  {ip}:6443 check\n'
+            return cfg if node_str in cfg else cfg+node_str
         for node_pair in args.nodes:
             name, ip = node_pair.split('=')
             backend_cfg = add_node(backend_cfg, name, ip)
