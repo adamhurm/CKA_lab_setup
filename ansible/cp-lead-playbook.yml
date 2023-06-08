@@ -25,7 +25,7 @@
       with_items:
         - mkdir -p /home/vagrant/.kube
         - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-        - chown vagrant:vagrant /home/vagrant/.kube/config
+        - chown -R vagrant:vagrant /home/vagrant/.kube
       changed_when: true # TODO: clean up
 
     - name: Set up autocomplete
