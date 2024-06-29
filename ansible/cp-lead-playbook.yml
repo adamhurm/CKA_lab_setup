@@ -2,6 +2,8 @@
 - name: Set up lead control-plane
   hosts: all
   become: true
+  vars:
+    calico_version: "3.25.0"
   tasks:
     - name: Init cluster using control-plane-endpoint
       ansible.builtin.command: kubeadm init --control-plane-endpoint "cp-lb:6443" --upload-certs \
@@ -34,12 +36,24 @@
         line: "source <(kubectl completion bash)"
         insertafter: EOF
 
+    - name: Set up kubectl alias
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: "alias k=kubectl"
+        insertafter: EOF
+
+    - name: Set up autocomplete for aliased kubectl
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: "complete -o default -F __start_kubectl k"
+        insertafter: EOF
+
     - name: Install calico operator and CRDs
       become: false
-      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v{{ calico_version }}/manifests/tigera-operator.yaml
       changed_when: true # TODO: clean up
 
     - name: Install calico pod network
       become: false
-      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v{{ calico_version }}/manifests/custom-resources.yaml
       changed_when: true # TODO: clean up
