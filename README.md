@@ -44,8 +44,8 @@ To change this behavior, edit the following values in Vagrantfile:
 ```Vagrantfile
 ### Vagrantfile
 ...
-C = 3  # control-planes | if C > 1, creates a load balancer (cp-lb)
-N = 3  # nodes
+CONTROL_PLANES = 3  # >1 creates a load balancer (cp-lb)
+NODES = 3
 ...
 v.memory = 8192
 v.cpus = 2
@@ -59,8 +59,8 @@ Edit the following values in Vagrantfile to create 1 control-plane and 2 nodes:
 ```Vagrantfile
 ### Vagrantfile
 ...
-C = 1 # control-plane
-N = 2 # nodes
+CONTROL_PLANES = 1
+NODES = 2
 ...
 # allocate 2 vCPUs and 8GB RAM to each VM
 v.memory = 8192

@@ -2,8 +2,6 @@
 - name: Set up cluster with one control-plane
   hosts: all
   become: true
-  vars:
-    calico_version: "3.28.0"
   tasks:
     - name: Init cluster as only control plane
       ansible.builtin.command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" \

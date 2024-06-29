@@ -1,6 +1,9 @@
+CONTROL_PLANES = 3
+NODES = 3
+
 IMAGE_NAME = "ubuntu/focal64"
-C = 3
-N = 3
+KUBERNETES_VERSION = "1.30"
+CALICO_VERSION = "3.28.0"
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
@@ -10,54 +13,61 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
     end
 
-    if C > 1 then # Set up load balancer if we are using HA configuration
+    # Create HAProxy load balancer if we are using HA configuration
+    if CONTROL_PLANES > 1 then 
         config.vm.define "cp-lb" do |cplb|
             cplb.vm.box = IMAGE_NAME
             cplb.vm.network "private_network", ip: "192.168.50.10"
             cplb.vm.hostname = "cp-lb"
-            cplb.vm.provision "ha-setup", type:'ansible' do |ansible| # Set up HAProxy
+            cplb.vm.provision "ha-setup", type:'ansible' do |ansible|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/haproxy-playbook.yml"
                 ansible.extra_vars = {
                     node_ip: "192.168.50.10",
-                    cp_count: C
+                    cp_count: CONTROL_PLANES
                 }
             end
         end
     end
 
-    (1..C).each do |i| # Set up control plane
+    # Create control-plane(s)
+    (1..CONTROL_PLANES).each do |i|
         config.vm.define "cp-#{i}" do |cp|
             cp.vm.box = IMAGE_NAME
             cp.vm.network "private_network", ip: "192.168.50.#{i + 10}"
             cp.vm.hostname = "cp-#{i}"
-            cp.vm.provision "k8s", type:'ansible' do |ansible| # Install k8s
+            cp.vm.provision "k8s", type:'ansible' do |ansible|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10}"
+                    node_ip: "192.168.50.#{i + 10}",
+                    k8s_version: KUBERNETES_VERSION
                 }
             end
-            if C == 1 then # Only one control plane
-                cp.vm.provision "only-cp", type:'ansible' do |ansible| # Create cluster with control plane
+            # Create one control-plane
+            if CONTROL_PLANES == 1 then 
+                cp.vm.provision "only-cp", type:'ansible' do |ansible|
                     ansible.compatibility_mode = "2.0"
                     ansible.playbook = "ansible/cp-only-playbook.yml"
                     ansible.extra_vars = {
                         node_ip: "192.168.50.11",
-                        node_name: "cp-1"
+                        node_name: "cp-1",
+                        calico_version: CALICO_VERSION
                     }
                 end
-            else # Multiple control planes
-                if i == 1 then # Lead control plane
-                    cp.vm.provision "lead-cp-setup", type:'ansible' do |ansible| # Create cluster with control plane
+            # Create multiple control-planes
+            else 
+                if i == 1 then
+                    cp.vm.provision "lead-cp-setup", type:'ansible' do |ansible|
                         ansible.compatibility_mode = "2.0"
                         ansible.playbook = "ansible/cp-lead-playbook.yml"
                         ansible.extra_vars = {
-                            node_ip: "192.168.50.11"
+                            node_ip: "192.168.50.11",
+                            calico_version: CALICO_VERSION
                         }
                     end
-                else # Additional control planes
-                    cp.vm.provision "ha-cp-setup", type:'ansible' do |ansible| # Add control plane to cluster
+                else
+                    cp.vm.provision "ha-cp-setup", type:'ansible' do |ansible|
                         ansible.compatibility_mode = "2.0"
                         ansible.playbook = "ansible/cp-ha-playbook.yml"
                         ansible.extra_vars = {
@@ -69,23 +79,25 @@ Vagrant.configure("2") do |config|
         end
     end
 
-    (1..N).each do |i| # Set up node
+    # Create node(s)
+    (1..NODES).each do |i|
         config.vm.define "node-#{i}" do |node|
             node.vm.box = IMAGE_NAME
-            node.vm.network "private_network", ip: "192.168.50.#{i + 10 + C}"
+            node.vm.network "private_network", ip: "192.168.50.#{i + 10 + CONTROL_PLANES}"
             node.vm.hostname = "node-#{i}"
-            node.vm.provision "k8s", type:'ansible' do |ansible| # Install k8s
+            node.vm.provision "k8s", type:'ansible' do |ansible|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10 + C}"
+                    node_ip: "192.168.50.#{i + 10 + CONTROL_PLANES}",
+                    k8s_version: KUBERNETES_VERSION
                 }
             end
-            node.vm.provision "ansible" do |ansible| # Add node to cluster
+            node.vm.provision "ansible" do |ansible|
                 ansible.compatibility_mode = "2.0"
                 ansible.playbook = "ansible/node-playbook.yml"
                 ansible.extra_vars = {
-                    node_ip: "192.168.50.#{i + 10 + C}"
+                    node_ip: "192.168.50.#{i + 10 + CONTROL_PLANES}"
                 }
             end
         end

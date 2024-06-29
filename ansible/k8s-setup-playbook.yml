@@ -2,8 +2,6 @@
 - name: Set up k8s
   hosts: all
   become: true
-  vars:
-    k8s_version: "1.30"
   tasks:
     - name: Install packages that allow apt to be used over HTTPS
       ansible.builtin.apt:

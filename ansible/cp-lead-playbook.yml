@@ -2,8 +2,6 @@
 - name: Set up lead control-plane
   hosts: all
   become: true
-  vars:
-    calico_version: "3.28.0"
   tasks:
     - name: Init cluster using control-plane-endpoint
       ansible.builtin.command: kubeadm init --control-plane-endpoint "cp-lb:6443" --upload-certs \
