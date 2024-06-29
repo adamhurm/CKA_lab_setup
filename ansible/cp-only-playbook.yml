@@ -28,23 +28,14 @@
         - chown -R vagrant:vagrant /home/vagrant/.kube
       changed_when: true # TODO: clean up
 
-    - name: Set up autocomplete
-      ansible.builtin.lineinfile:
+    - name: Set up kubectl autocomplete
+      ansible.builtin.blockinfile:
         path: /home/vagrant/.bashrc
-        line: "source <(kubectl completion bash)"
         insertafter: EOF
-
-    - name: Set up kubectl alias
-      ansible.builtin.lineinfile:
-        path: /home/vagrant/.bashrc
-        line: "alias k=kubectl"
-        insertafter: EOF
-
-    - name: Set up autocomplete for aliased kubectl
-      ansible.builtin.lineinfile:
-        path: /home/vagrant/.bashrc
-        line: "complete -o default -F __start_kubectl k"
-        insertafter: EOF
+        block: |
+          source <(kubectl completion bash)
+          alias k=kubectl
+          complete -o default -F __start_kubectl k
         
     - name: Install calico operator and CRDs
       become: false

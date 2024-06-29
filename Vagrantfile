@@ -1,7 +1,8 @@
 CONTROL_PLANES = 3
 NODES = 3
 
-IMAGE_NAME = "ubuntu/focal64"
+UBUNTU_DISTRO = "jammy"
+IMAGE_NAME = "ubuntu/#{UBUNTU_DISTRO}64"
 KUBERNETES_VERSION = "1.30"
 CALICO_VERSION = "3.28.0"
 
@@ -41,7 +42,8 @@ Vagrant.configure("2") do |config|
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
                     node_ip: "192.168.50.#{i + 10}",
-                    k8s_version: KUBERNETES_VERSION
+                    k8s_version: KUBERNETES_VERSION,
+                    ubuntu_distro: UBUNTU_DISTRO
                 }
             end
             # Create one control-plane
@@ -90,7 +92,8 @@ Vagrant.configure("2") do |config|
                 ansible.playbook = "ansible/k8s-setup-playbook.yml"
                 ansible.extra_vars = {
                     node_ip: "192.168.50.#{i + 10 + CONTROL_PLANES}",
-                    k8s_version: KUBERNETES_VERSION
+                    k8s_version: KUBERNETES_VERSION,
+                    ubuntu_distro: UBUNTU_DISTRO
                 }
             end
             node.vm.provision "ansible" do |ansible|
