@@ -4,7 +4,7 @@
   become: true
   tasks:
     - name: Init cluster as only control plane
-      ansible.builtin.command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}" \
+      ansible.builtin.command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" \
                                --node-name {{ node_name }} --pod-network-cidr=192.168.0.0/16
       register: init_output
       changed_when: true # TODO: clean up

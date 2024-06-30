@@ -102,10 +102,21 @@
         daemon_reload: true
         state: restarted
 
-    - name: Clear containerd config # https://github.com/containerd/containerd/issues/4581
-      ansible.builtin.file:
-        path: /etc/containerd/config.toml
-        state: absent
+    - name: Get containerd default config
+      ansible.builtin.command: containerd config default
+      register: containerd_config
+      
+    - name: Replace containerd config
+      ansible.builtin.copy:
+        dest: /etc/containerd/config.toml
+        content: "{{ containerd_config.stdout }}"
+
+    - name: Modify containerd config - enable cri plugin, sytemd cgroup, and force pause==3.9
+      ansible.builtin.command: "{{ item }}"
+      with_items:
+        - sed -i 's/\disabled_plugins = \["cri"\]/disabled_plugins = \[\]/' /etc/containerd/config.toml
+        - sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+        - sed -i 's/sandbox_image = "registry.k8s.io\/pause:3.8"/sandbox_image = "registry.k8s.io\/pause:3.9"/' /etc/containerd/config.toml
 
     - name: Restart containerd
       ansible.builtin.service:

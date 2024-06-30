@@ -31,7 +31,6 @@
     - name: Set up kubectl autocomplete
       ansible.builtin.blockinfile:
         path: /home/vagrant/.bashrc
-        insertafter: EOF
         block: |
           source <(kubectl completion bash)
           alias k=kubectl

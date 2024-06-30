@@ -24,13 +24,13 @@ $ vagrant up
 ```shell
 $ vagrant ssh cp-1
 vagrant@cp-1:~$ kubectl get node -o wide
-NAME     STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
-cp-1     Ready    control-plane   23h   v1.27.2   192.168.50.11   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
-cp-2     Ready    control-plane   23h   v1.27.2   192.168.50.12   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
-cp-3     Ready    control-plane   23h   v1.27.2   192.168.50.13   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
-node-1   Ready    <none>          23h   v1.27.2   192.168.50.14   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
-node-2   Ready    <none>          23h   v1.27.2   192.168.50.15   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
-node-3   Ready    <none>          23h   v1.27.2   192.168.50.16   <none>        Ubuntu 20.04.6 LTS   5.4.0-148-generic   containerd://1.6.21
+NAME     STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME
+cp-1     Ready    control-plane   32m   v1.30.2   192.168.50.11   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
+cp-2     Ready    control-plane   30m   v1.30.2   192.168.50.12   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
+cp-3     Ready    control-plane   26m   v1.30.2   192.168.50.13   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
+node-1   Ready    <none>          24m   v1.30.2   192.168.50.14   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
+node-2   Ready    <none>          23m   v1.30.2   192.168.50.15   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
+node-3   Ready    <none>          21m   v1.30.2   192.168.50.16   <none>        Ubuntu 22.04.4 LTS   5.15.0-113-generic   containerd://1.7.18
 ```
 Once the HAProxy (**cp-lb**) playbook finishes, you can view the HAProxy status page: http://192.168.50.10:9999/stats/
 
